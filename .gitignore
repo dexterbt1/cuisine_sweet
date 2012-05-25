@@ -3,6 +3,8 @@ py/lib
 py/include
 py/build
 build/
+dist/
+src/*.egg-info
 *.egg
 .Python
 *.sw[op]
