@@ -7,3 +7,4 @@ py/build
 *.sw[op]
 *.pyc
 distribute*tar*
+Session.vim
