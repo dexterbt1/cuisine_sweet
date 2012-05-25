@@ -1,6 +1,6 @@
 # cuisine\_sweet
 
-Sugar-coated declarative recipes built on top of (Fabric)[http://fabfile.org] and (Cuisine)[https://github.com/sebastien/cuisine]
+Sugar-coated declarative recipes built on top of [http://fabfile.org](Fabric) and [https://github.com/sebastien/cuisine](Cuisine)
 
 # Sample fabfile.py
 
@@ -44,3 +44,9 @@ Sugar-coated declarative recipes built on top of (Fabric)[http://fabfile.org] an
 
 This is experimental alpha-quality stuff. The API and implementation are still highly fluid and continuously evolving.
 See LICENSE file for more information
+
+# References
+
+* Fabric - http://fabfile.org
+* Cuisine - https://github.com/sebastien/cuisine
+
