@@ -1,6 +1,6 @@
 # cuisine\_sweet
 
-Sugar-coated declarative recipes built on top of [http://fabfile.org](Fabric) and [https://github.com/sebastien/cuisine](Cuisine)
+Sugar-coated declarative recipes built on top of [Fabric](http://fabfile.org) and [Cuisine](https://github.com/sebastien/cuisine)
 
 # Sample fabfile.py
 
@@ -27,6 +27,14 @@ Sugar-coated declarative recipes built on top of [http://fabfile.org](Fabric) an
         ensure.supervisord.running('git/myproject/supervisord.conf', '/tmp/myproject.supervisord.pid')
         ensure.supervisord.updated_with_latest_config('git/myproject/supervisord.conf')
 
+# Installation
+
+This module is available on PyPI and via Github directly.
+
+* Using pip: `pip install cuisine_sweet`.
+* Using setuptools. `easy_install cuisine_sweet`.
+* Or clone + `python setup install`
+
 
 # Ensure Modules
 
@@ -43,7 +51,7 @@ Sugar-coated declarative recipes built on top of [http://fabfile.org](Fabric) an
 # Warning
 
 This is experimental alpha-quality stuff. The API and implementation are still highly fluid and continuously evolving.
-See LICENSE file for more information
+See LICENSE file for more information.
 
 # References
 
