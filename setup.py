@@ -7,7 +7,7 @@ setup(
     # pypi stuff
     author = "Dexter Tad-y",
     author_email = "dtady@cpan.org",
-    description = "Sugar-coated declarative recipes built on top of Fabric and Cuisine",
+    description = "Sugar-coated declarative deployment recipes built on top of Fabric and Cuisine",
     license = "Revised BSD License",
     keywords = [ "fabric", "cuisine", "deployment" ],
     url = "http://github.com/dexterbt1/cuisine_sweet",
@@ -21,8 +21,9 @@ setup(
     install_requires = [
         'Fabric',
         'PyYAML',
-        'cuisine==0.2.6',
+        'cuisine>=0.2.6',
         'distribute==0.6.19',
+        'docutils',
         'pexpect',
     ],
 
