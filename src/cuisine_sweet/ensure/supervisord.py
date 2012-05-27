@@ -1,5 +1,7 @@
 """
-Fabric checks and assertions for Supervisord instances
+Fabfile functions for ensuring the state of a supervisord instance
+
+See `Supervisord <http://www.supervisord.org>`_ - an open-source process-control system.
 """
 
 import re
@@ -12,6 +14,10 @@ from cuisine_sweet.utils import completed_ok
 def installed():
     """
     Ensure that the supervisord is installed.
+
+    If not present, supervisord is sudo() installed via ``easy_install``.
+    
+    Currently RHEL/CentOS flavored.
     """
     cuisine.select_package(option='yum')
     cuisine.command_ensure('easy_install', package='python-setuptools')
@@ -24,15 +30,21 @@ def running(configfile, pidfile, basedir=None, envsource=None, sudo=False):
     """
     Ensure that the supervisord instance is running with the correct config.
 
+    :param configfile: *required* str; path to the configfile
+    :param pidfile: *required* str; path to the pidfile
+    :param basedir: str; the base directory where supervisor will be run
+    :param envsource: str; path to the shell-script to load before running supervisord
+    :param sudo: bool; run supervisord under sudo(), otherwise via run()
+
     Instance checking is based whether the process pid read from pidfile 
     is running.
 
     If basedir is specified, it overrides the '-d' parameter passed when
     running the supervisord daemon. If not specified, then the current
-    working directory (via `pwd`) is used. 
+    working directory (via ``pwd``) is used. 
 
     If envsource is specified, prior to starting the supervisord daemon,
-    this path-to-shell-script-environment gets loaded (via `source`)
+    this path-to-shell-script-environment gets loaded (via ``source``)
 
     If sudo is true, then the supervisord daemon is started via sudo(),
     otherwise, uses the default run() user.
@@ -75,6 +87,21 @@ def running(configfile, pidfile, basedir=None, envsource=None, sudo=False):
 def updated_with_latest_config(configfile):
     """
     Ensure that the latest config of the supervisord is loaded and reflected.
+
+    :param configfile: *required* str; path to the configfile
+
+    If there are any changes in the supervisord config, the supervisord
+    process must be able to do the ff:
+
+    - start newly added programs
+    - stop deleted programs
+    - restart programs with updated config
+
+    All these is automatically handled via Supervisord's ``reread`` and ``update``
+    commands.
+
+    Assumption: The ``configfile`` must contain the correct settings for ``[supervisorctl]``
+    including the username and password.
     """
     run('which supervisorctl')
     run('supervisorctl -c %s reread' % configfile)

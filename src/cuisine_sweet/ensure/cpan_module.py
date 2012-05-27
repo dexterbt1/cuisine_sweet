@@ -1,5 +1,5 @@
 """
-Fabric checks and assertions for CPAN modules
+Fabfile functions for ensuring the state of CPAN modules
 """
 
 import os
@@ -8,7 +8,6 @@ import cuisine
 from fabric.api import run, puts, env
 from fabric.colors import green, blue
 from cuisine_sweet.utils import completed_ok
-
 
 def perl_config_archname():
     return run("perl -MConfig -e 'print $Config{archname}'")
@@ -60,7 +59,29 @@ def _prepare_environment():
 @completed_ok(arg_output=[0])
 def installed(module, source=None, locallib='perl5', home='.'):
     """
-    Ensure that the cpan module installed (in a localized locallib path)
+    Ensure that the Perl CPAN Module installed (in a localized locallib path)
+
+    :param module: *required* str; the name of the CPAN module to check/install
+    :param source: str; the url to the CPAN dist tarball
+    :param locallib: str; the directory name for locallib
+    :param home: str; the base directory where locallib
+
+    Modules are expected to be located under a `local::lib <http://search.cpan.org/perldoc?local::lib>`_
+    directory. If the module is not found, then it is automatically installed using a copy of
+    `cpanm <http://search.cpan.org/perldoc?App::cpanminus>`_.
+
+    Ths full path of the locallib is derived from ``home + locallib``, 
+    which defaults to ``./perl5`` of the remote user. 
+
+    Scripts relying on the modules installed under the locallib will (at the minimum) need to
+    set their shell environment variables (typically via ``source path/to/my_env_source_file``:
+
+    .. code-block:: sh
+
+        # myenv.source; either source this or add these lines somewhere ... e.g. ~/.bashrc
+        export LOCALLIB="perl5"
+        export PERL5ARCH=`perl -MConfig -e 'print $Config{archname}'`
+        export PERL5LIB="$HOME/$LOCALLIB/lib/perl5:$HOME/$LOCALLIB/lib/perl5/$PERL5ARCH:$HOME/$LOCALLIB/lib/perl5/$PERL5ARCH/auto/"
     """
     try:
         perlarch = env.perl_arch[env.host]
@@ -71,5 +92,4 @@ def installed(module, source=None, locallib='perl5', home='.'):
         cpanm = env.cpanm_bin[env.host]
     if not _exists(module, home=home, perlarch=perlarch, locallib=locallib):
         _do_install(module, home=home, cpanm=cpanm, source=source, locallib=locallib)
-
 

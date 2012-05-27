@@ -3,6 +3,7 @@ py/lib
 py/include
 py/build
 build/
+docs/_build
 dist/
 src/*.egg-info
 *.egg

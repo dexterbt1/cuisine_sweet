@@ -1,6 +1,7 @@
 import sys
 import inspect
 import pexpect
+from decorator import decorator
 from fabric.api import puts
 from fabric.colors import green
 
@@ -18,8 +19,9 @@ def completed_ok(arg_output=[]):
             for i in arg_output:
                 out.append(args[i])
             puts(green('%s.%s(%s): OK' % (func.__module__, func.__name__, ', '.join(out))))
+            return r
         return wrapped_f
-    return wrap
+    return decorator(wrap) # needed to preserve: func signature, docstring, name
         
 
 def local_run_expect(cmd, prompts, answers, logfile=sys.stdout):

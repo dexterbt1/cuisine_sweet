@@ -1,3 +1,7 @@
+"""
+Fabfile functions for ensuring the state of deployed code from git
+"""
+
 import os
 import sys
 import cuisine
@@ -13,7 +17,32 @@ from cuisine_sweet.utils import completed_ok, local_run_expect
 @completed_ok(arg_output=[0,1])
 def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False):
     """
-    Does a git clone locally then rsync to remote
+    Does a git clone locally first then rsync to remote.
+
+    :param repo_url: *required* str; url of the git repo
+    :param repo_dir: *required* str; dir name of the repo clone
+    :param refspec: str; the git refspec to checkout for deploy (can be a branch, tag, git hash, etc.)
+    :param home: str; home directory to deploy the code to.
+    :param base_dir: str; dir name relative to ``home``. 
+    :param local_tmpdir: str; where the local clone + checkout will be located
+    :param save_history: bool; if True, then the history of every deploys is tracked, for rollback purposes later.
+
+    Problem statement: How do we ensure that code from a git repository gets deployed 
+    uniformly, efficiently across all remote hosts.
+
+    This is one solution that uses ``rsync`` to push code (just as fabric is push-based).
+    Git returns to being a code/config repository and is not required in the destination hosts.
+
+    Another advantage of this approach is when not all destination hosts have access to the 
+    git repository. If ssh public key auth is used in the repo (e.g. gitolite, Github), each 
+    destination server may then require either: (a) identical ssh keys or (b) provision each 
+    destination server in the repo. Both have maintenance and security issues.
+
+    All git operations are done on a separate ``local_tmpdir``, and not on a checkout where 
+    the fabfile is located. Everytime this function is invoked, the ``repo_url`` is always
+    ensured to be fresh (``git clone + git fetch``). This means only commits fetched from the
+    ``repo_url`` can be deployed. 
+
     """
     # ensure git + rsync is available locally
     local('which git')
