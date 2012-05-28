@@ -24,6 +24,7 @@ setup(
         'cuisine>=0.2.6',
         'distribute==0.6.19',
         'docutils',
+        'decorator',
         'pexpect',
     ],
 
