@@ -12,16 +12,14 @@ def this_func(level=1):
 
 
 def completed_ok(arg_output=[]):
-    def wrap(func):
-        def wrapped_f(*args, **kwargs):
-            r = func(*args, **kwargs)
-            out = []
-            for i in arg_output:
-                out.append(args[i])
-            puts(green('%s.%s(%s): OK' % (func.__module__, func.__name__, ', '.join(out))))
-            return r
-        return wrapped_f
-    return decorator(wrap) # needed to preserve: func signature, docstring, name
+    def wrapped_f(func, *args, **kwargs):
+        r = func(*args, **kwargs)
+        out = []
+        for i in arg_output:
+            out.append(args[i])
+        puts(green('%s.%s(%s): OK' % (func.__module__, func.__name__, ', '.join(out))))
+        return r
+    return decorator(wrapped_f) # needed to preserve: func signature, docstring, name
         
 
 def local_run_expect(cmd, prompts, answers, logfile=sys.stdout):
