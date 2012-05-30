@@ -21,7 +21,7 @@ def dir_created(path, recursive=False, mode=None, owner=None, group=None):
     :param group: str; user/uid that should own the file, as passed to chgrp
 
     """
-    cuisine.dir_ensure(name, recursive=recursive, mode=mode, owner=owner, group=group)
+    cuisine.dir_ensure(path, recursive=recursive, mode=mode, owner=owner, group=group)
 
 
 @completed_ok(arg_output=[0,1])
