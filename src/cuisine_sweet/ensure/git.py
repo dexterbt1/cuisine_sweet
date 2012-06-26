@@ -9,6 +9,7 @@ import cuisine
 from fabric.api import env, cd, lcd, local, run, put, abort
 from fabric.utils import error
 from fabric.auth import get_password
+from fabric.network import normalize
 
 from cuisine_sweet import git
 from cuisine_sweet.utils import completed_ok, local_run_expect
@@ -105,7 +106,16 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
 
     prompts = [ 'Are you sure you want to continue connecting', ".* password:" ]
     answers = [ 'yes', get_password() ]
-    rsync_cmd = '''/bin/bash -l -c "rsync --delete --exclude \".git/" -lpthrvz --rsh='ssh -p 22' %s %s:%s"''' % (clone_basepath_local + "/", env.host_string, clone_basepath_remote)
+
+    # resolve user,host,port for rsh string
+    user, host, port = normalize(env.host_string)
+    port_string = "-p %s" % port
+    rsh_parts = [port_string]
+    rsh_string = "--rsh='ssh %s'" % " ".join(rsh_parts)
+
+    user_at_host = "%s@%s" % (user, host)
+
+    rsync_cmd = '''/bin/bash -l -c "rsync --delete --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
     local_run_expect(rsync_cmd, prompts, answers, logfile=sys.stdout)
             
     
