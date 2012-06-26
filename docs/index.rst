@@ -9,7 +9,6 @@ Contents
     :glob:
     
     installation
-    api_usage
     api/cuisine_sweet.ensure
 
 
