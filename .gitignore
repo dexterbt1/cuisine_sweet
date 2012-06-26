@@ -2,6 +2,7 @@ py/bin
 py/lib
 py/include
 py/build
+py/local
 build/
 docs/_build
 dist/
