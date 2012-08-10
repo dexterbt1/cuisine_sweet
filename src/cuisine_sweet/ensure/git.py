@@ -58,8 +58,6 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     clone_basepath_remote = os.path.join(home, base_dir)
     cuisine.dir_ensure(clone_basepath_remote)
 
-    cuisine.command_ensure('git', package='git')
-
     # prepare history (for recovery)
     hist = git.GitHistory()
     if save_history:
