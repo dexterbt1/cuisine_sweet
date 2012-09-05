@@ -25,13 +25,12 @@ def dir_created(path, recursive=False, mode=None, owner=None, group=None):
 
 
 @completed_ok(arg_output=[0,1])
-def dir_symlink_created(src, dest):
+def dir_symlink_created(src, dest, symbolic=True, mode=None, owner=None, group=None):
     """
     Ensure that a symlink at `dest` pointing to `src` is created.
 
     :param src: *required* str; path to the source real directory
     :param dest: *required* str; path to the destination symlink
     """
-    run('ln -s %s %s >& /dev/null; true' % (src, dest))
-    run('test -L %s && test -d %s' % (dest, dest))
-
+    cuisine.file_link(src, dest, symbolic=symbolic, mode=mode, owner=owner, group=group)
+    cuisine.file_is_link(src)
