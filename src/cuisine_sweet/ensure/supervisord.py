@@ -106,4 +106,5 @@ def updated_with_latest_config(configfile):
     run('which supervisorctl')
     run('supervisorctl -c %s reread' % configfile)
     run('supervisorctl -c %s update' % configfile)
+    run('supervisorctl -c %s restart all' % configfile)
 
