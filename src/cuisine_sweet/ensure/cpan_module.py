@@ -3,9 +3,10 @@ Fabfile functions for ensuring the state of CPAN modules
 """
 
 import os
+import pipes
 import cuisine
 
-from fabric.api import run, puts, env
+from fabric.api import run, puts, env, prefix
 from fabric.colors import green, blue
 from cuisine_sweet.utils import completed_ok
 
@@ -40,7 +41,8 @@ def _do_install(module_name, home='/tmp', cpanm='/tmp/.deploy/bin/cpanm', source
         mod = source
     locallib_base = os.path.join(home, locallib)
     opts = '-l %s' % locallib_base
-    run('%s %s %s' % (cpanm, opts, mod))
+    with prefix('export AUTOMATED_TESTING=1 PERL_MM_NONINTERACTIVE=1'):
+        run('%s %s %s' % (cpanm, opts, mod))
 
 
 def _prepare_environment():
