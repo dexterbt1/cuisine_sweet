@@ -113,7 +113,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
 
     user_at_host = "%s@%s" % (user, host)
 
-    rsync_cmd = '''/bin/bash -l -c "rsync --delete --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
+    rsync_cmd = '''/bin/bash -l -c "rsync --delete-during --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
     local_run_expect(rsync_cmd, prompts, answers, logfile=sys.stdout)
             
     
