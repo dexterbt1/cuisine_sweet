@@ -5,24 +5,32 @@ See `Supervisord <http://www.supervisord.org>`_ - an open-source process-control
 """
 
 import re
+import time
 import cuisine
 from fabric.api import run, sudo
 from cuisine_sweet.utils import completed_ok
 
 
 @completed_ok()
-def installed():
+def installed(version=None):
     """
     Ensure that the supervisord is installed.
 
-    If not present, supervisord is sudo() installed via ``easy_install``.
+    :param version: str; the exact version string to install (e.g. "3.0a12")
+
+    If supervisord is not present, the package is sudo() installed via ``easy_install``.
     
     Currently RHEL/CentOS flavored.
     """
-    cuisine.select_package(option='yum')
+    cuisine.select_package(option='yum') 
     cuisine.command_ensure('easy_install', package='python-setuptools')
     if not cuisine.command_check('supervisord'):
-        sudo('easy_install supervisor')
+        if version:
+            sudo('easy_install supervisor==%s' % version)
+        else:
+            sudo('easy_install supervisor')
+            
+        
 
 
 @completed_ok(arg_output=[0])
@@ -80,7 +88,12 @@ def running(configfile, pidfile, basedir=None, envsource=None, sudo=False):
             sudo(xcmd)
         else:
             run(xcmd)
-            
+        time.sleep(3)
+
+    # --- test pid if running
+    pid = run('cat %s; true' % pidfile)
+    run('kill -0 %s' % pid)
+
 
 
 @completed_ok(arg_output=[0])
