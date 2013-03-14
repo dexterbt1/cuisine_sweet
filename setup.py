@@ -21,8 +21,8 @@ setup(
     install_requires = [
         'Fabric',
         'PyYAML',
-        'cuisine>=0.2.6',
-        'distribute==0.6.19',
+        'cuisine==0.2.6',
+        'distribute',
         'docutils',
         'decorator',
         'pexpect',

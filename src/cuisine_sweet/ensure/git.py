@@ -87,7 +87,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     with lcd(clone_path_local):
         local('git fetch')
         local('git reset --hard "origin/%s"' % refspec)
-        local('git submodule update --init')
+        local('git submodule update --init --recursive')
         fuller_log = local('git log -n1 --pretty=fuller', capture=True)
         hist.log_latest(repo_url, refspec, repo_dir, fuller_log)
 
