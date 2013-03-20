@@ -49,9 +49,12 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     local('which git')
     local('which rsync')
 
+    # resolve user,host,port for rsh string
+    user, host, port = normalize(env.host_string)
+
     # ensure the temp paths are ready 
     local_user = local('whoami', capture=True)
-    clone_basepath_local = os.path.join(local_tmpdir, local_user, 'deploy', env.host, env.user, 'git')
+    clone_basepath_local = os.path.join(local_tmpdir, local_user, 'deploy', host, user, str(port), 'git')
     local('mkdir -p %s' % clone_basepath_local)
 
     # prepare remote path strings
@@ -105,8 +108,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     prompts = [ 'Are you sure you want to continue connecting', ".* password:" ]
     answers = [ 'yes', get_password() ]
 
-    # resolve user,host,port for rsh string
-    user, host, port = normalize(env.host_string)
+
     port_string = "-p %s" % port
     rsh_parts = [port_string]
     rsh_string = "--rsh='ssh %s'" % " ".join(rsh_parts)
