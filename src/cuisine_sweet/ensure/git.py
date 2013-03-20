@@ -16,7 +16,7 @@ from cuisine_sweet.utils import completed_ok, local_run_expect
 
 
 @completed_ok(arg_output=[0,1])
-def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False):
+def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True):
     """
     Does a git clone locally first then rsync to remote.
 
@@ -27,6 +27,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     :param base_dir: str; dir name relative to ``home``. 
     :param local_tmpdir: str; where the local clone + checkout will be located
     :param save_history: bool; if True, then the history of every deploys is tracked, for rollback purposes later.
+    :param do_delete: bool; if True, then rsync parameter --delete-during will be added
 
     Problem statement: How do we ensure that code from a git repository gets deployed 
     uniformly, efficiently across all remote hosts.
@@ -115,7 +116,11 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
 
     user_at_host = "%s@%s" % (user, host)
 
-    rsync_cmd = '''/bin/bash -l -c "rsync --delete-during --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
+    do_delete_param = ''
+    if do_delete:
+        do_delete_param = '--delete-during'
+
+    rsync_cmd = '''/bin/bash -l -c "rsync %s --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (do_delete_param, rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
     local_run_expect(rsync_cmd, prompts, answers, logfile=sys.stdout)
             
     
