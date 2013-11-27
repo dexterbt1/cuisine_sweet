@@ -125,6 +125,67 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
             
     
 
+
+@completed_ok(arg_output=[0,1,2])
+def ssh_push(repo_url, branch, dest_name, dest_base_path='opt', host_string=None):
+    """
+    Deploy to remote via git push and post-receive checkout hook
+
+    :param repo_url: *required* str; url of the git repo
+    :param branch: *required* str; the git branch to checkout for deploy
+    :param dest_name: *required* str; name of the directory to checkout the code to.
+    :param dest_base_path: str; base dir of dest_name, default 'opt' (relative to ``$HOME``)
+    :param host_string: str, the host string, will default to ``env.host_string``
+
+    Problem statement: How do we ensure that code from a git repository gets deployed 
+    uniformly, efficiently across all remote hosts.
+
+    This is another solution to pushing code to remote servers, similar to the ``rsync()`` solution.
+    Leverage ssh since fabric uses this already; we get auth + push benefits.
+
+    And take advantage of git's post-receive hook, wherein we setup a hidden bare repo and a hook 
+    to automatically checkout a working copy after pushing.
+
+    Git is required in remote hosts, but only for handling the  post-receive checkout purpose only.
+
+    All git operations are done on a separate per-repo local tmpdir, and not on a checkout where 
+    the fabfile is located. Everytime this function is invoked, the ``repo_url`` is always
+    ensured to be fresh (``git clone + git fetch``). This means only existing commits fetched from the
+    ``repo_url`` can be deployed. 
+
+    """
+    if host_string is None:
+        host_string = env.host_string
+    
+    # create local clone
+    user, host, port = normalize(host_string)
+    tmpprojdir = os.path.join(tempfile.gettempdir(), 'deploy', host, 'port-'+port, user )
+    if not local('ls %s/%s/.git && echo OK; true' % (tmpprojdir, dest_name), capture=True).endswith('OK'):
+        local('mkdir -p %s' % tmpprojdir)
+        local('(cd %s && git clone -q %s %s && cd %s && git checkout branch)' % (tmpprojdir, repo_url, dest_name, dest_name, branch))
+    with lcd('%s/%s' % (tmpprojdir, dest_name)):
+        local('git fetch -q origin')
+        local('git reset -q --hard origin/%s' % branch )
+ 
+    user_home = run('pwd')
+    run('mkdir -p %s/%s' % (dest_base_path, dest_name))
+    if not run('test -d .gitpush/%s.git && echo OK; true' % dest_name ).endswith('OK'):
+        ### http://caiustheory.com/automatically-deploying-website-from-remote-git-repository
+        run('mkdir -p .gitpush/%s.git' % dest_name)
+        with cd('.gitpush/%s.git' % dest_name):
+            run('git init --bare -q')
+            run('git --bare update-server-info')
+            run('git config --bool core.bare false')
+            run('git config --path core.worktree %s/%s/%s' % (user_home, dest_base_path, dest_name))
+            run('git config receive.denycurrentbranch ignore')
+            run("""echo '#!/bin/sh' > hooks/post-receive""")
+            run("""echo 'git checkout -f' >> hooks/post-receive""")
+            run('chmod 755 hooks/post-receive')
+ 
+    with lcd('%s/%s' % (tmpprojdir, dest_name)):
+        if not local('git remote | grep dest | head -n1', capture=True).endswith('dest'):
+            local('git remote add dest ssh://%s@%s:%s%s/.gitpush/%s.git' % (user, host, port, user_home, dest_name))
+        local('git push dest +master:refs/heads/%s' % branch)
     
 
 
