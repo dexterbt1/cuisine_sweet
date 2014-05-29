@@ -22,7 +22,7 @@ def cpanm_bin_installed(home='/tmp'):
     if not cuisine.file_exists(cpanm):
         cuisine.dir_ensure(binpath, recursive=True, mode=755)
         cuisine.package_ensure('curl')
-        run('curl -L http://cpanmin.us > %s' % cpanm)
+        run('curl -kL http://cpanmin.us > %s' % cpanm)
         run('chmod 755 %s' % cpanm)
         cuisine.file_exists(cpanm)
     return cpanm
