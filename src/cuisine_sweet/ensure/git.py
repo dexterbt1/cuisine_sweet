@@ -16,7 +16,7 @@ from cuisine_sweet.utils import completed_ok, local_run_expect
 
 
 @completed_ok(arg_output=[0,1])
-def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True):
+def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True, gateway='' ):
     """
     Does a git clone locally first then rsync to remote.
 
@@ -28,6 +28,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     :param local_tmpdir: str; where the local clone + checkout will be located
     :param save_history: bool; if True, then the history of every deploys is tracked, for rollback purposes later.
     :param do_delete: bool; if True, then rsync parameter --delete-during will be added
+    :param gateway: str; bastion host utilized to reach target host
 
     Problem statement: How do we ensure that code from a git repository gets deployed 
     uniformly, efficiently across all remote hosts.
@@ -109,10 +110,11 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     prompts = [ 'Are you sure you want to continue connecting', ".* password:" ]
     answers = [ 'yes', get_password() ]
 
-
-    port_string = "-p %s" % port
-    rsh_parts = [port_string]
-    rsh_string = "--rsh='ssh %s'" % " ".join(rsh_parts)
+    port_string    = "-p %s" % port
+    gateway_string = "" if gateway == "" else "-e 'ssh %s ssh'" % (gateway)
+    
+    rsh_parts      = [port_string, gateway_string ]
+    rsh_string     = "--rsh='ssh %s'" % " ".join(rsh_parts)
 
     user_at_host = "%s@%s" % (user, host)
 
@@ -120,6 +122,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     if do_delete:
         do_delete_param = '--delete-during'
 
+    # "rsync --delete-during --exclude ".git/" -lpthrvz --rsh='ssh -p 22' /tmp/wilson/deploy/10.100.10.126/ec2-user/22/git/ ec2-user@10.100.10.126:./git"
     rsync_cmd = '''/bin/bash -l -c "rsync %s --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (do_delete_param, rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
     local_run_expect(rsync_cmd, prompts, answers, logfile=sys.stdout)
             
