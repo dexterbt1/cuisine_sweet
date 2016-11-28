@@ -10,7 +10,7 @@ from fabric.api import env, cd, lcd, local, run, put, abort
 from fabric.utils import error
 from fabric.auth import get_password
 from fabric.network import normalize
-
+from fabric.version import get_version
 from cuisine_sweet import git
 from cuisine_sweet.utils import completed_ok, local_run_expect
 
@@ -107,11 +107,16 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     if save_history:
         cuisine.file_write(remote_hist_path, hist.dump())
 
+    if( get_version() > '1.4.2' ):
+        passwrd = get_password( user, host, port )
+    else:
+        passwrd = get_password()
+
     prompts = [ 'Are you sure you want to continue connecting', ".* password:" ]
-    answers = [ 'yes', get_password() ]
+    answers = [ 'yes', passwrd ]
 
     port_string    = "-p %s" % port
-    gateway_string = "" if gateway == "" else "-e 'ssh %s ssh'" % (gateway)
+    gateway_string = "" if gateway == "" else "-e 'ssh %s ssh'" % gateway
     
     rsh_parts      = [port_string, gateway_string ]
     rsh_string     = "--rsh='ssh %s'" % " ".join(rsh_parts)
