@@ -107,7 +107,9 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     if save_history:
         cuisine.file_write(remote_hist_path, hist.dump())
 
-    if( get_version() > '1.4.2' ):
+    print get_version
+    #passwrd = get_password()
+    if( get_version() > '1.6.4' ):
         passwrd = get_password( user, host, port )
     else:
         passwrd = get_password()
@@ -115,18 +117,18 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     prompts = [ 'Are you sure you want to continue connecting', ".* password:" ]
     answers = [ 'yes', passwrd ]
 
-    port_string    = "-p %s" % port
-    gateway_string = "" if gateway == "" else "-e 'ssh %s ssh'" % gateway
-    rsh_parts      = [port_string, gateway_string ]
-    rsh_string     = "--rsh='ssh %s'" % " ".join(rsh_parts)
+    port_string      = "-p %s" % port
+    hostcheck_string = "-o StrictHostKeyChecking=no"
+    gateway_string   = "" if gateway == "" else "%s ssh" % gateway
+    rsh_parts        = [ port_string, hostcheck_string, gateway_string ]
+    rsh_string       = "--rsh='ssh %s'" % " ".join(rsh_parts)
 
     user_at_host   = "%s@%s" % (user, host)
 
     do_delete_param = ''
     if do_delete:
         do_delete_param = '--delete-during'
-
-    # "rsync --delete-during --exclude ".git/" -lpthrvz --rsh='ssh -p 22' /tmp/wilson/deploy/10.100.10.126/ec2-user/22/git/ ec2-user@10.100.10.126:./git"
+    # bash -l -c "rsync --dry-run --delete-during --exclude ".git/" -lpthrvvvz -e 'ssh -o StrictHostKeyChecking=no proxy@52.220.20.70 ssh' /tmp/wilson/deploy/10.100.10.126/ec2-user/22/git/ ec2-user@10.100.10.126:./git"
     rsync_cmd = '''/bin/bash -l -c "rsync %s --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (do_delete_param, rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
     local_run_expect(rsync_cmd, prompts, answers, logfile=sys.stdout)
             
