@@ -117,11 +117,10 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
 
     port_string    = "-p %s" % port
     gateway_string = "" if gateway == "" else "-e 'ssh %s ssh'" % gateway
-    
     rsh_parts      = [port_string, gateway_string ]
     rsh_string     = "--rsh='ssh %s'" % " ".join(rsh_parts)
 
-    user_at_host = "%s@%s" % (user, host)
+    user_at_host   = "%s@%s" % (user, host)
 
     do_delete_param = ''
     if do_delete:
