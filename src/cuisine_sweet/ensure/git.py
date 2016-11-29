@@ -16,7 +16,7 @@ from cuisine_sweet.utils import completed_ok, local_run_expect
 
 
 @completed_ok(arg_output=[0,1])
-def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True, gateway='' ):
+def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True ):
     """
     Does a git clone locally first then rsync to remote.
 
@@ -28,7 +28,6 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     :param local_tmpdir: str; where the local clone + checkout will be located
     :param save_history: bool; if True, then the history of every deploys is tracked, for rollback purposes later.
     :param do_delete: bool; if True, then rsync parameter --delete-during will be added
-    :param gateway: str; bastion host utilized to reach target host
 
     Problem statement: How do we ensure that code from a git repository gets deployed 
     uniformly, efficiently across all remote hosts.
@@ -118,11 +117,11 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
 
     port_string      = "-p %s" % port
     hostcheck_string = "-o StrictHostKeyChecking=no"
-    gateway_string   = "" if gateway == "" else "%s ssh" % gateway
+    gateway_string   = "" if not env.gateway else "%s ssh" % env.gateway
     rsh_parts        = [ port_string, hostcheck_string, gateway_string ]
     rsh_string       = "--rsh='ssh %s'" % " ".join(rsh_parts)
 
-    user_at_host   = "%s@%s" % (user, host)
+    user_at_host     = "%s@%s" % (user, host)
 
     do_delete_param = ''
     if do_delete:
@@ -130,7 +129,6 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     # bash -l -c "rsync --dry-run --delete-during --exclude ".git/" -lpthrvvvz -e 'ssh -o StrictHostKeyChecking=no proxy@52.220.20.70 ssh' /tmp/wilson/deploy/10.100.10.126/ec2-user/22/git/ ec2-user@10.100.10.126:./git"
     rsync_cmd = '''/bin/bash -l -c "rsync %s --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (do_delete_param, rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
     local_run_expect(rsync_cmd, prompts, answers, logfile=sys.stdout)
-            
     
 
 
@@ -195,5 +193,3 @@ def ssh_push(repo_url, branch, dest_name, dest_base_path='opt', host_string=None
             local('git remote add dest ssh://%s@%s:%s%s/.gitpush/%s.git' % (user, host, port, user_home, dest_name))
         local('git push dest +master:refs/heads/%s' % branch)
     
-
-
