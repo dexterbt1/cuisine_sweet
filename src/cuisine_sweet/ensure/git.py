@@ -16,7 +16,7 @@ from cuisine_sweet.utils import completed_ok, local_run_expect
 
 
 @completed_ok(arg_output=[0,1])
-def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True ):
+def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True):
     """
     Does a git clone locally first then rsync to remote.
 
@@ -121,12 +121,12 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     rsh_parts        = [ port_string, hostcheck_string, gateway_string ]
     rsh_string       = "--rsh='ssh %s'" % " ".join(rsh_parts)
 
-    user_at_host     = "%s@%s" % (user, host)
+    user_at_host = "%s@%s" % (user, host)
 
     do_delete_param = ''
     if do_delete:
         do_delete_param = '--delete-during'
-    # bash -l -c "rsync --dry-run --delete-during --exclude ".git/" -lpthrvvvz -e 'ssh -o StrictHostKeyChecking=no proxy@52.220.20.70 ssh' /tmp/wilson/deploy/10.100.10.126/ec2-user/22/git/ ec2-user@10.100.10.126:./git"
+
     rsync_cmd = '''/bin/bash -l -c "rsync %s --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (do_delete_param, rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
     local_run_expect(rsync_cmd, prompts, answers, logfile=sys.stdout)
     
