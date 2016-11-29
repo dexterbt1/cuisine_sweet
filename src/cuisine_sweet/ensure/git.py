@@ -10,13 +10,13 @@ from fabric.api import env, cd, lcd, local, run, put, abort
 from fabric.utils import error
 from fabric.auth import get_password
 from fabric.network import normalize
-
+from fabric.version import get_version
 from cuisine_sweet import git
 from cuisine_sweet.utils import completed_ok, local_run_expect
 
 
 @completed_ok(arg_output=[0,1])
-def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True):
+def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True, check_hostkey=True):
     """
     Does a git clone locally first then rsync to remote.
 
@@ -28,7 +28,8 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     :param local_tmpdir: str; where the local clone + checkout will be located
     :param save_history: bool; if True, then the history of every deploys is tracked, for rollback purposes later.
     :param do_delete: bool; if True, then rsync parameter --delete-during will be added
-
+    :param check_hostkey: bool; if True, then ssh option StrictHostKeyChecking is enabled
+    
     Problem statement: How do we ensure that code from a git repository gets deployed 
     uniformly, efficiently across all remote hosts.
 
@@ -106,13 +107,20 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     if save_history:
         cuisine.file_write(remote_hist_path, hist.dump())
 
+    if( get_version() >= '1.6.2' ):
+        # signature changed in this version
+        passwrd = get_password( user, host, port )
+    else:
+        passwrd = get_password()
+
     prompts = [ 'Are you sure you want to continue connecting', ".* password:" ]
-    answers = [ 'yes', get_password() ]
+    answers = [ 'yes', passwrd ]
 
-
-    port_string = "-p %s" % port
-    rsh_parts = [port_string]
-    rsh_string = "--rsh='ssh %s'" % " ".join(rsh_parts)
+    port_string      = "-p %s" % port
+    hostcheck_string = "-o StrictHostKeyChecking=%s" % ('yes' if check_hostkey else 'no') 
+    gateway_string   = "" if not env.gateway else "%s ssh" % env.gateway
+    rsh_parts        = [ port_string, hostcheck_string, gateway_string ]
+    rsh_string       = "--rsh='ssh %s'" % " ".join(rsh_parts)
 
     user_at_host = "%s@%s" % (user, host)
 
@@ -122,7 +130,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
 
     rsync_cmd = '''/bin/bash -l -c "rsync %s --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (do_delete_param, rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
     local_run_expect(rsync_cmd, prompts, answers, logfile=sys.stdout)
-            
+
     
 
 
