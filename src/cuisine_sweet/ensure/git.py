@@ -130,7 +130,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
 
     rsync_cmd = '''/bin/bash -l -c "rsync %s --exclude \".git/" -lpthrvz %s %s %s:%s"''' % (do_delete_param, rsh_string, clone_basepath_local + "/", user_at_host, clone_basepath_remote)
     local_run_expect(rsync_cmd, prompts, answers, logfile=sys.stdout)
-    
+
     
 
 
