@@ -107,6 +107,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     if save_history:
         cuisine.file_write(remote_hist_path, hist.dump())
 
+    print 'version is ' + get_version()
     if( get_version() >= '1.6.2' ):
         # signature changed in this version
         passwrd = get_password( user, host, port )
