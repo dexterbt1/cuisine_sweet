@@ -118,7 +118,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
 
     port_string      = "-p %s" % port
     hostcheck_string = "-o StrictHostKeyChecking=%s" % ('yes' if check_hostkey else 'no') 
-    gateway_string   = "" if not env.gateway else "%s ssh" % env.gateway
+    gateway_string   = "" if not env.gateway else "%s ssh %s" % ( env.gateway, hostcheck_string )
     rsh_parts        = [ port_string, hostcheck_string, gateway_string ]
     rsh_string       = "--rsh='ssh %s'" % " ".join(rsh_parts)
 
