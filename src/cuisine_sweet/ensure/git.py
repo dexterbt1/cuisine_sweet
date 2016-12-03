@@ -13,8 +13,8 @@ from fabric.network import normalize
 from fabric.version import get_version
 from cuisine_sweet import git
 from cuisine_sweet.utils import completed_ok, local_run_expect
-# used by setuptools
-from packaging import version  
+# undocumented, from http://hg.python.org/cpython/file/tip/Lib/distutils/version.py
+from distutils.version import LooseVersion, StrictVersion
 
 @completed_ok(arg_output=[0,1])
 def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True, check_hostkey=True):
@@ -108,7 +108,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     if save_history:
         cuisine.file_write(remote_hist_path, hist.dump())
 
-    if( version.parse( get_version() ) >= version.parse( '1.6.2' ) ):
+    if( StrictVersion( get_version() ) >= StrictVersion( '1.6.2' ) ):
         # signature changed in this version
         passwrd = get_password( user, host, port )
     else:
