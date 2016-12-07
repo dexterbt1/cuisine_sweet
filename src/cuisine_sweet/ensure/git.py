@@ -13,7 +13,8 @@ from fabric.network import normalize
 from fabric.version import get_version
 from cuisine_sweet import git
 from cuisine_sweet.utils import completed_ok, local_run_expect
-
+# undocumented, from http://hg.python.org/cpython/file/tip/Lib/distutils/version.py
+from distutils.version import LooseVersion, StrictVersion
 
 @completed_ok(arg_output=[0,1])
 def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_tmpdir='/tmp', save_history=False, do_delete=True, check_hostkey=True):
@@ -107,7 +108,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
     if save_history:
         cuisine.file_write(remote_hist_path, hist.dump())
 
-    if( get_version() >= '1.6.2' ):
+    if( StrictVersion( get_version() ) >= StrictVersion( '1.6.2' ) ):
         # signature changed in this version
         passwrd = get_password( user, host, port )
     else:
@@ -118,7 +119,7 @@ def rsync(repo_url, repo_dir, refspec='master', home='.', base_dir='git', local_
 
     port_string      = "-p %s" % port
     hostcheck_string = "-o StrictHostKeyChecking=%s" % ('yes' if check_hostkey else 'no') 
-    gateway_string   = "" if not env.gateway else "%s ssh" % env.gateway
+    gateway_string   = "" if not env.gateway else "%s ssh %s" % ( env.gateway, hostcheck_string )
     rsh_parts        = [ port_string, hostcheck_string, gateway_string ]
     rsh_string       = "--rsh='ssh %s'" % " ".join(rsh_parts)
 
